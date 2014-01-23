@@ -10,6 +10,7 @@
 :- import_module list.
 :- import_module string.
 :- import_module solutions.
+:- import_module util.
 
 main(!IO) :-
       solutions(test, R),
@@ -19,7 +20,7 @@ main(!IO) :-
 % helper function to test 'pick'
 :- pred test(list(char)::out) is nondet.
 test(R) :- words(Xs),
-           pick(Xs, 't', R, _).
+           util.pick(Xs, 't', R, _).
 
 % mapping string.to_char_list directly yields compiler
 % errors that probably need some kind of annotation to fix
@@ -31,12 +32,3 @@ to_list(A, B) :- string.to_char_list(A, B).
 :- pred words(list(list(char))::out) is det.
 words(Xs) :- Ws = ["an", "aunt", "tint", "wet", "win"],
              map(to_list, Ws, Xs).
-
-% pick one from a list of words, optionally reversed,
-% that starts with the given letter
-:- pred pick(list(list(char))::in, char::in, 
-             list(char)::out, list(list(char))::out) is nondet.
-pick([X | Xs], C, X, Xs)       :- X = [C | _].
-pick([X | Xs], C, Xrev, Xs)    :- Xrev = list.reverse(X),
-                                  Xrev = [C | _].
-pick([X | Xs], C, Y, [X | Ys]) :- pick(Xs, C, Y, Ys).
