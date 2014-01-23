@@ -9,7 +9,7 @@
 :- import_module map.
 :- import_module set.
 
-:- type size ---> size(height :: int, width :: int).
+:- type size ---> size(width :: int, height :: int).
 :- type point == {int, int}.
 :- type grid ---> grid(size :: size, map :: map(point, char)).
 
