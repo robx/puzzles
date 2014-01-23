@@ -50,16 +50,22 @@
 :- func show(T) = list(string) <= (grid(T)).
 
 :- type mgrid ---> mgrid(msize :: size, mmap :: map(point, char)).
-
 :- instance grid(mgrid).
 
 :- pred m_init(size::in, mgrid::out) is det.
+
+:- type hgrid ---> hgrid(mgrid :: mgrid, hints :: map(point, char)).
+:- instance grid(hgrid).
+
+:- pred h_init(size::in, list({point, char})::in, hgrid::out) is semidet.
+:- pred h_no_hints(hgrid::in) is semidet.
 
 :- implementation.
 
 :- import_module maybe.
 :- import_module solutions.
 :- import_module string.
+:- import_module pair.
 
 :- instance grid(mgrid) where [
     size(G) = G^msize,
@@ -74,6 +80,24 @@
 
 m_init(Size, Grid) :- map.init(M),
                       Grid = mgrid(Size, M).
+
+:- instance grid(hgrid) where [
+    size(G) = size(G^mgrid),
+    (char_at(G, P, C) :- char_at(G^mgrid, P, C)),
+    (place_char(P, C, Gin, Gout) :- hgrid(MGin, Hin) = Gin,
+                                    place_char(P, C, MGin, MGout),
+                                    map.delete(P, Hin, Hout),
+                                    Gout = hgrid(MGout, Hout))
+].
+
+h_init(Size, Hints, Grid) :- m_init(Size, G),
+                             place_chars(Hints, G, G1),
+                             HPs = map((func({A, B}) = A - B), Hints),
+                             map.init(HMap),
+                             map.set_from_assoc_list(HPs, HMap, HMap1),
+                             Grid = hgrid(G1, HMap1).
+
+h_no_hints(G) :- map.is_empty(G^hints).
 
 in_bounds(Grid, {X, Y}) :- X >= 0,
                            Y >= 0,
