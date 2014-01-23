@@ -14,12 +14,13 @@
 
 :- implementation.
 
-solve(Ws, [H | _], S, Gout) :-
+solve(Ws, [H | Hs], S, Gout) :-
     {P0, C} = H,
     init(S, G),
+    place_chars(Hs, G, G1),
     pick_cont(Ws, C, W0, Ws1),
-    place_word_char_any(P0, W0, C, G, G1, Ps, Pe),
-    solve1(Ws1, Ps, Pe, G1, Gout).
+    place_word_char_any(P0, W0, C, G1, G2, Ps, Pe),
+    solve1(Ws1, Ps, Pe, G2, Gout).
     % TODO: check that all hints are satisfied.
     % TODO: check that no more than two words connect at any point
 
