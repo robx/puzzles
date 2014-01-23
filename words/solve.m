@@ -16,7 +16,7 @@
 
 solve(Ws, [H | Hs], S, Gout) :-
     {P0, C} = H,
-    init(S, G),
+    m_init(S, G),
     place_chars(Hs, G, G1),
     pick_cont(Ws, C, W0, Ws1),
     place_word_char_any(P0, W0, C, G1, G2, Ps, Pe),

@@ -85,19 +85,19 @@ test_pick_cont_1_n :- solutions_set(
                       Sols = set.set(["an", "aunt", "tint", "win"]).
 
 :- pred test_grid_points is semidet.
-test_grid_points :- init(size(0, 0), G),
+test_grid_points :- m_init(size(0, 0), G),
                     points(G) = set.set([]),
-                    init(size(-2, 5), G1),
+                    m_init(size(-2, 5), G1),
                     points(G1) = set.set([]),
-                    init(size(1, 1), G2),
+                    m_init(size(1, 1), G2),
                     points(G2) = set.set([{0, 0}]),
-                    init(size(2, 2), G3),
+                    m_init(size(2, 2), G3),
                     points(G3) = set.set([{0, 0}, {0, 1}, {1, 0}, {1, 1}]),
-                    init(size(1, 2), G4),
+                    m_init(size(1, 2), G4),
                     points(G4) = set.set([{0, 0}, {0, 1}]).
 
 :- pred test_grid_bounds is semidet.
-test_grid_bounds :- init(size(3, 3), G),
+test_grid_bounds :- m_init(size(3, 3), G),
                     solutions_set(
                         pred(P::out) is nondet :- (
                             int.nondet_int_in_range(-2, 5, X),
@@ -110,7 +110,7 @@ test_grid_bounds :- init(size(3, 3), G),
                     Pin = points(G).
 
 :- pred test_place_char is semidet.
-test_place_char :- init(size(2, 2), G),
+test_place_char :- m_init(size(2, 2), G),
                    place_char({0, 0}, 'A', G, G1),
                    place_char({1, 0}, 'B', G1, G2),
                    not place_char({1, 0}, 'C', G2, _),
@@ -118,7 +118,7 @@ test_place_char :- init(size(2, 2), G),
                    not place_char({2, 0}, 'D', G3, _).
 
 :- pred test_char_at is semidet.
-test_char_at :- init(size(2, 1), G),
+test_char_at :- m_init(size(2, 1), G),
                 not char_at(G, {0, 0}, _),
                 not char_at(G, {1, 1}, _),
                 place_char({0, 0}, 'A', G, G1),
@@ -132,7 +132,7 @@ test_dirs :- list.length(dirs) = 8,
              not list.member({2, 0}, dirs).
 
 :- pred test_place_word is semidet.
-test_place_word :- init(size(3, 2), G),
+test_place_word :- m_init(size(3, 2), G),
                    W1 = from_string("a"),
                    W2 = from_string("ba"),
                    W3 = from_string("abc"),
@@ -162,7 +162,7 @@ test_split_word :- W = from_string("abdefg"),
 
 :- pred test_place_word_char is semidet.
 test_place_word_char :-
-    init(size(1, 5), G),
+    m_init(size(1, 5), G),
     W = from_string("abac"),
     place_char({0, 0}, 'c', G, G1),
     place_word_char({0, 0}, {0, -1}, W, 'c', G1, _, {0, 3}, {0, 0}),
@@ -174,7 +174,7 @@ test_place_word_char :-
 
 :- pred test_place_word_any is semidet.
 test_place_word_any :-
-    init(size(3, 3), G),
+    m_init(size(3, 3), G),
     W = from_string("abc"),
     place_char({2, 0}, 'd', G, G1),
     solutions_set(pred(Pend::out) is nondet :- place_word_any({0, 0}, W, G1, _, Pend),
@@ -183,7 +183,7 @@ test_place_word_any :-
 
 :- pred test_place_word_char_any is semidet.
 test_place_word_char_any :-
-    init(size(3, 3), G),
+    m_init(size(3, 3), G),
     W = from_string("abc"),
     place_char({2, 0}, 'd', G, G1),
     place_char({1, 2}, 'a', G1, G2),
@@ -203,7 +203,7 @@ test_solve_1 :-
 
 :- pred test_show is semidet.
 test_show :-
-    init(size(3, 3), G),
+    m_init(size(3, 3), G),
     place_char({0, 0}, 'a', G, G1),
     place_word({2, 0}, {-1, 1}, from_string("XYZ"), G1, G2, _),
     show(G2) = ["Z..", ".Y.", "a.X"].
