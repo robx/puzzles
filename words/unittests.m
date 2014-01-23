@@ -10,6 +10,7 @@
 :- import_module char.
 :- import_module int.
 :- import_module list.
+:- import_module maybe.
 :- import_module pair.
 :- import_module set.
 :- import_module string.
@@ -24,7 +25,8 @@ main(!IO) :-
                "test_pick_1_x" - test_pick_1_x,
                "test_pick_cont_1_n" - bool.pred_to_bool(test_pick_cont_1_n),
                "test_grid_points" - bool.pred_to_bool(test_grid_points),
-               "test_grid_bounds" - bool.pred_to_bool(test_grid_bounds)],
+               "test_grid_bounds" - bool.pred_to_bool(test_grid_bounds),
+               "test_place_char" - bool.pred_to_bool(test_place_char)],
       io.write(Tests, !IO),
       io.write_string("\n", !IO),
       Status = bool_to_int(bool.not(and_snd(Tests))),
@@ -95,3 +97,11 @@ test_grid_bounds :- init(size(3, 3), G),
                         Pin
                     ),
                     Pin = points(G).
+
+:- pred test_place_char is semidet.
+test_place_char :- init(size(2, 2), G),
+                   place_char({0, 0}, 'A', G, G1),
+                   place_char({1, 0}, 'B', G1, G2),
+                   not place_char({1, 0}, 'C', G2, _),
+                   place_char({0, 0}, 'A', G2, G3),
+                   not place_char({2, 0}, 'D', G3, _).
