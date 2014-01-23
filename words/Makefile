@@ -1,6 +1,6 @@
 .DEFAULT_GOAL: build
 
-SRC_FILES = examples.m util.m unittests.m words.m grid.m
+SRC_FILES = examples.m util.m unittests.m words.m grid.m solve.m
 BINARIES = words unittests
 
 build: $(BINARIES)
