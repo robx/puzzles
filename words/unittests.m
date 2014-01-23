@@ -121,3 +121,21 @@ test_dirs :- list.length(dirs) = 8,
              list.member({-1, -1}, dirs),
              not list.member({0, 0}, dirs),
              not list.member({2, 0}, dirs).
+
+:- pred test_place_word is semidet.
+test_place_word :- init(size(3, 2), G),
+                   W0 = from_string(""),
+                   W1 = from_string("a"),
+                   W2 = from_string("ba"),
+                   W3 = from_string("abc"),
+                   not place_word({2, 0}, {1, 0}, W3, G, _),
+                   not place_word({3, 0}, {1, 0}, W1, G, _),
+                   not place_word({0, 0}, {1, -1}, W2, G, _),
+                   place_word({0, 0}, {1, -1}, W1, G, G1),
+                   char_at(G1, {0, 0}, 'a'),
+                   not place_word({0, 0}, {1, 1}, W2, G1, _),
+                   place_word({1, 0}, {-1, 1}, W2, G1, G2),
+                   char_at(G2, {0, 1}, 'a'),
+                   place_word({0, 0}, {1, 0}, W3, G2, G3),
+                   char_at(G3, {2, 0}, 'c'),
+                   place_word({2, 0}, {1, 1}, W0, G3, _).

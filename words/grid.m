@@ -26,6 +26,8 @@
 :- type dir == {int, int}.
 :- func dirs = list(dir).
 
+:- pred place_word(point::in, dir::in, list(char)::in, grid::in, grid::out) is semidet.
+
 :- implementation.
 
 :- import_module maybe.
@@ -60,4 +62,12 @@ dirs = solutions((pred(D::out) is nondet :- int.nondet_int_in_range(-1, 1, DX),
                                             (DX \= 0; DY \= 0),
                                             D = {DX, DY}
                  )).
-                 
+
+:- func move(dir, point) = point.
+move({DX, DY}, {PX, PY}) = {PX + DX, PY + DY}.
+
+place_word(_, _, [], Gin, Gout) :- Gout = Gin.
+place_word(P, D, [C | Cs], Gin, Gout) :- place_char(P, C, Gin, G),
+                                         P1 = move(D, P),
+                                         place_word(P1, D, Cs, G, Gout).
+
