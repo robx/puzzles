@@ -23,6 +23,7 @@ main(!IO) :-
       Tests = ["test_pick_1_t" - test_pick_1_t,
                "test_pick_1_x" - test_pick_1_x,
                "test_pick_cont_1_n" - bool.pred_to_bool(test_pick_cont_1_n),
+               "test_grid_points" - bool.pred_to_bool(test_grid_points),
                "test_grid_bounds" - bool.pred_to_bool(test_grid_bounds)],
       io.write(Tests, !IO),
       io.write_string("\n", !IO),
@@ -70,6 +71,18 @@ test_pick_cont_1_n :- solutions_set(
                       ),
                       Sols = set.set(["an", "aunt", "tint", "win"]).
 
+:- pred test_grid_points is semidet.
+test_grid_points :- init(size(0, 0), G),
+                    points(G) = set.set([]),
+                    init(size(-2, 5), G1),
+                    points(G1) = set.set([]),
+                    init(size(1, 1), G2),
+                    points(G2) = set.set([{0, 0}]),
+                    init(size(2, 2), G3),
+                    points(G3) = set.set([{0, 0}, {0, 1}, {1, 0}, {1, 1}]),
+                    init(size(1, 2), G4),
+                    points(G4) = set.set([{0, 0}, {0, 1}]).
+
 :- pred test_grid_bounds is semidet.
 test_grid_bounds :- init(size(3, 3), G),
                     solutions_set(
@@ -81,12 +94,4 @@ test_grid_bounds :- init(size(3, 3), G),
                         ),
                         Pin
                     ),
-                    solutions_set(
-                        pred(P::out) is nondet :- (
-                            int.nondet_int_in_range(0, 2, X),
-                            int.nondet_int_in_range(0, 2, Y),
-                            P = {X, Y}
-                        ),
-                        Pgrid
-                    ),
-                    Pin = Pgrid.
+                    Pin = points(G).
