@@ -1,3 +1,4 @@
+
 :- module unittests.
 :- interface.
 :- import_module io.
@@ -19,6 +20,7 @@
 :- import_module util.
 :- import_module examples.
 :- import_module grid.
+:- import_module solve.
 
 main(!IO) :-
       Tests = ["test_pick_1_t" - test_pick_1_t,
@@ -33,7 +35,8 @@ main(!IO) :-
                "test_split_word" - bool.pred_to_bool(test_split_word),
                "test_place_word_char" - bool.pred_to_bool(test_place_word_char),
                "test_place_word_any" - bool.pred_to_bool(test_place_word_any),
-               "test_place_word_char_any" - bool.pred_to_bool(test_place_word_char_any)],
+               "test_place_word_char_any" - bool.pred_to_bool(test_place_word_char_any),
+               "test_solve_1" - bool.pred_to_bool(test_solve_1)],
       io.write(Tests, !IO),
       io.write_string("\n", !IO),
       Status = bool_to_int(bool.not(and_snd(Tests))),
@@ -187,3 +190,12 @@ test_place_word_char_any :-
                       place_word_char_any({1, 1}, W, 'b', G2, _, Pstart, _),
                   Ps),
     Ps = set.set([{0, 0}, {2, 1}, {2, 2}, {1, 2}, {0, 1}]).
+
+:- pred test_solve_1 is semidet.
+test_solve_1 :-
+    S = size(3, 3),
+    Ws = [from_string("abc")],
+    Hs = [{{0, 0}, 'a'}],
+    not solve(Ws, Hs, S, _),
+    Ws1 = map(from_string, ["abc", "ccd", "dda"]),
+    solve(Ws1, Hs, S, _).
