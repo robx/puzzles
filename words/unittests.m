@@ -1,4 +1,4 @@
-:- module test.
+:- module unittests.
 :- interface.
 :- import_module io.
 
@@ -17,7 +17,8 @@
 :- import_module examples.
 
 main(!IO) :-
-      Tests = ["test_pick_1_t" - test_pick_1_t],
+      Tests = ["test_pick_1_t" - test_pick_1_t,
+               "test_pick_1_x" - test_pick_1_x],
       io.write(Tests, !IO),
       io.write_string("\n", !IO),
       Status = bool_to_int(bool.not(and_snd(Tests))),
@@ -39,5 +40,16 @@ pick_1_t(S) :- examples.words_1(Xs),
 :- func test_pick_1_t = bool.
 test_pick_1_t = X :- if solutions_set(pick_1_t, S),
                         S = set.set(["tew", "tint", "tnit", "tnua"])
+                     then X = yes
+                     else X = no.
+
+:- pred pick_1_x(string::out) is nondet.
+pick_1_x(S) :- examples.words_1(Xs),
+               util.pick(Xs, 'x', R, _),
+               util.to_string(R, S).
+
+:- func test_pick_1_x = bool.
+test_pick_1_x = X :- if solutions_set(pick_1_x, S),
+                        S = set.set([])
                      then X = yes
                      else X = no.
