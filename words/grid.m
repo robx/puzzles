@@ -33,6 +33,12 @@
 :- pred place_word(point::in, dir::in, word::in,
                    grid::in, grid::out, point::out) is semidet.
 
+% place the given word in the given direction, placing the given
+% character (at any place in the word) at the given point;
+% return start and end point
+:- pred place_word_char(point::in, dir::in, word::in, char::in,
+                        grid::in, grid::out, point::out, point::out) is nondet.
+
 :- implementation.
 
 :- import_module maybe.
@@ -71,8 +77,16 @@ dirs = solutions((pred(D::out) is nondet :- int.nondet_int_in_range(-1, 1, DX),
 :- func move(dir, point) = point.
 move({DX, DY}, {PX, PY}) = {PX + DX, PY + DY}.
 
+:- func rev(dir) = dir.
+rev({DX, DY}) = {-DX, -DY}.
+
 place_word(P, _, [C], Gin, Gout, Pend) :- place_char(P, C, Gin, Gout),
                                           Pend = P.
 place_word(P, D, [C|[C1|Cs]], Gin, Gout, Pend) :- place_char(P, C, Gin, G),
                                                   P1 = move(D, P),
                                                   place_word(P1, D, [C1|Cs], G, Gout, Pend).
+
+place_word_char(P, D, W, C, Gin, Gout, Pstart, Pend) :-
+    util.split_word(W, C, W0, W1),
+    place_word(P, rev(D), W0, Gin, G, Pstart),
+    place_word(P, D, W1, G, Gout, Pend).
