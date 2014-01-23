@@ -27,7 +27,8 @@ main(!IO) :-
                "test_grid_points" - bool.pred_to_bool(test_grid_points),
                "test_grid_bounds" - bool.pred_to_bool(test_grid_bounds),
                "test_place_char" - bool.pred_to_bool(test_place_char),
-               "test_char_at" - bool.pred_to_bool(test_char_at)],
+               "test_char_at" - bool.pred_to_bool(test_char_at),
+               "test_dirs" - bool.pred_to_bool(test_dirs)],
       io.write(Tests, !IO),
       io.write_string("\n", !IO),
       Status = bool_to_int(bool.not(and_snd(Tests))),
@@ -113,3 +114,10 @@ test_char_at :- init(size(2, 1), G),
                 not char_at(G, {1, 1}, _),
                 place_char({0, 0}, 'A', G, G1),
                 char_at(G1, {0, 0}, 'A').
+
+:- pred test_dirs is semidet.
+test_dirs :- list.length(dirs) = 8,
+             list.member({1, 0}, dirs),
+             list.member({-1, -1}, dirs),
+             not list.member({0, 0}, dirs),
+             not list.member({2, 0}, dirs).
