@@ -26,6 +26,8 @@
 % yet or the same character is already there
 :- pred place_char(point::in, char::in, grid::in, grid::out) is semidet.
 
+:- pred place_chars(list({point, char}):: in, grid::in, grid::out) is semidet.
+
 :- type dir == {int, int}.
 :- func dirs = list(dir).
 
@@ -75,6 +77,10 @@ place_char(P, C, Gin, Gout) :- in_bounds(Gin, P),
                                map.search_insert(P, C, OldC, M, M1),
                                (OldC = no; OldC = yes(C)),
                                Gout = grid(S, M1).
+
+place_chars([], Gin, Gout) :- Gout = Gin.
+place_chars([{P, C}|Xs], Gin, Gout) :- place_char(P, C, Gin, G1),
+                                       place_chars(Xs, G1, Gout).
 
 dirs = solutions((pred(D::out) is nondet :- int.nondet_int_in_range(-1, 1, DX),
                                             int.nondet_int_in_range(-1, 1, DY),
