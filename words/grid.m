@@ -20,6 +20,7 @@
 :- pred in_bounds(grid::in, point::in) is semidet.
 :- func points(grid) = set(point) is det.
 :- pred char_at(grid::in, point::in, char::out) is semidet.
+:- func show(grid) = list(string).
 
 % set character at point to the given value, if there's nothing there
 % yet or the same character is already there
@@ -49,6 +50,7 @@
 
 :- import_module maybe.
 :- import_module solutions.
+:- import_module string.
 
 init(Size, Grid) :- map.init(M),
                     Grid = grid(Size, M).
@@ -104,3 +106,22 @@ place_word_any(P, W, Gin, Gout, Pend) :-
 place_word_char_any(P, W, C, Gin, Gout, Pstart, Pend) :-
     list.member(D, dirs),
     place_word_char(P, D, W, C, Gin, Gout, Pstart, Pend).
+
+:- func int_range(int) = list(int).
+int_range(N) = (if N =< 0 then [] else [N - 1|int_range(N - 1)]).
+
+:- func show_char(grid, point) = char.
+show_char(G, P) = C :- map.search_insert(P, 'X', OldV, G^map, _),
+                       (
+                           OldV = yes(C)
+                       ;
+                           OldV = no,
+                           C = '_'
+                       ).
+
+:- func show_line(grid, int) = string.
+show_line(G, Y) = string.from_char_list(map(func(X) = show_char(G, {X, Y}),
+                                            list.reverse(int_range(G^size^width)))).
+
+show(G) = map(func(Y) = show_line(G, Y),
+              int_range(G^size^height)).

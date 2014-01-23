@@ -36,7 +36,8 @@ main(!IO) :-
                "test_place_word_char" - bool.pred_to_bool(test_place_word_char),
                "test_place_word_any" - bool.pred_to_bool(test_place_word_any),
                "test_place_word_char_any" - bool.pred_to_bool(test_place_word_char_any),
-               "test_solve_1" - bool.pred_to_bool(test_solve_1)],
+               "test_solve_1" - bool.pred_to_bool(test_solve_1),
+               "test_show" - bool.pred_to_bool(test_show)],
       io.write(Tests, !IO),
       io.write_string("\n", !IO),
       Status = bool_to_int(bool.not(and_snd(Tests))),
@@ -199,3 +200,10 @@ test_solve_1 :-
     not solve(Ws, Hs, S, _),
     Ws1 = map(from_string, ["abc", "ccd", "dda"]),
     solve(Ws1, Hs, S, _).
+
+:- pred test_show is semidet.
+test_show :-
+    init(size(3, 3), G),
+    place_char({0, 0}, 'a', G, G1),
+    place_word({2, 0}, {-1, 1}, from_string("XYZ"), G1, G2, _),
+    show(G2) = ["Z__", "_Y_", "a_X"].
