@@ -19,4 +19,4 @@
 size_1 = size(4, 4).
 words_1 = Xs :- Ws = ["an", "aunt", "tint", "wet", "win"],
                 util.from_strings(Ws, Xs).
-hints_1 = [{{0, 1}, 'n'}, {{3, 2}, 'e'}].
+hints_1 = [{{3, 2}, 'e'}, {{0, 1}, 'n'}].
