@@ -24,7 +24,7 @@ main(!IO) :-
                get_next,
                !IO).
 
-:- pred get_next(grid::in, bool::out, io::di, io::uo) is det.
+:- pred get_next(mgrid::in, bool::out, io::di, io::uo) is det.
 get_next(G, More, !IO) :-
     write_lines(show(G), !IO),
     io.write_string("\n", !IO),

@@ -1,6 +1,6 @@
 :- module grid.
 
-% this is about letter grids and placing words
+% this is about letter mgrids and placing words
 
 :- interface.
 
@@ -14,19 +14,19 @@
 
 :- type size ---> size(width :: int, height :: int).
 :- type point == {int, int}.
-:- type grid ---> grid(size :: size, map :: map(point, char)).
+:- type mgrid ---> mgrid(size :: size, map :: map(point, char)).
 
-:- pred init(size::in, grid::out) is det.
-:- pred in_bounds(grid::in, point::in) is semidet.
-:- func points(grid) = set(point) is det.
-:- pred char_at(grid::in, point::in, char::out) is semidet.
-:- func show(grid) = list(string).
+:- pred init(size::in, mgrid::out) is det.
+:- pred in_bounds(mgrid::in, point::in) is semidet.
+:- func points(mgrid) = set(point) is det.
+:- pred char_at(mgrid::in, point::in, char::out) is semidet.
+:- func show(mgrid) = list(string).
 
 % set character at point to the given value, if there's nothing there
 % yet or the same character is already there
-:- pred place_char(point::in, char::in, grid::in, grid::out) is semidet.
+:- pred place_char(point::in, char::in, mgrid::in, mgrid::out) is semidet.
 
-:- pred place_chars(list({point, char}):: in, grid::in, grid::out) is semidet.
+:- pred place_chars(list({point, char}):: in, mgrid::in, mgrid::out) is semidet.
 
 :- type dir == {int, int}.
 :- func dirs = list(dir).
@@ -34,19 +34,19 @@
 % place the given word in the given direction, if no conflict;
 % sets output point to end of word
 :- pred place_word(point::in, dir::in, word::in,
-                   grid::in, grid::out, point::out) is semidet.
+                   mgrid::in, mgrid::out, point::out) is semidet.
 
 % place the given word in the given direction, placing the given
 % character (at any place in the word) at the given point;
 % return start and end point
 :- pred place_word_char(point::in, dir::in, word::in, char::in,
-                        grid::in, grid::out, point::out, point::out) is nondet.
+                        mgrid::in, mgrid::out, point::out, point::out) is nondet.
 
 % variants that try any direction
 :- pred place_word_any(point::in, word::in,
-                       grid::in, grid::out, point::out) is nondet.
+                       mgrid::in, mgrid::out, point::out) is nondet.
 :- pred place_word_char_any(point::in, word::in, char::in,
-                            grid::in, grid::out, point::out, point::out) is nondet.
+                            mgrid::in, mgrid::out, point::out, point::out) is nondet.
 
 :- implementation.
 
@@ -55,14 +55,14 @@
 :- import_module string.
 
 init(Size, Grid) :- map.init(M),
-                    Grid = grid(Size, M).
+                    Grid = mgrid(Size, M).
 
 in_bounds(Grid, {X, Y}) :- X >= 0,
                            Y >= 0,
                            X < Grid^size^width,
                            Y < Grid^size^height.
 
-:- pred nondet_in_bounds(grid::in, point::out) is nondet.
+:- pred nondet_in_bounds(mgrid::in, point::out) is nondet.
 nondet_in_bounds(Grid, P) :- int.nondet_int_in_range(0, Grid^size^width - 1, X),
                              int.nondet_int_in_range(0, Grid^size^height - 1, Y),
                              P = {X, Y}.
@@ -73,10 +73,10 @@ char_at(G, P, C) :- in_bounds(G, P),
                     C = map.search(G^map, P).
 
 place_char(P, C, Gin, Gout) :- in_bounds(Gin, P),
-                               grid(S, M) = Gin,
+                               mgrid(S, M) = Gin,
                                map.search_insert(P, C, OldC, M, M1),
                                (OldC = no; OldC = yes(C)),
-                               Gout = grid(S, M1).
+                               Gout = mgrid(S, M1).
 
 place_chars([], Gin, Gout) :- Gout = Gin.
 place_chars([{P, C}|Xs], Gin, Gout) :- place_char(P, C, Gin, G1),
@@ -119,7 +119,7 @@ int_range(N) = (if N =< 0 then [] else [N - 1|int_range(N - 1)]).
 
 % TODO: this is the only way I found to substitute a character
 % just in case the key is not in the map...
-:- func show_char(grid, point) = char.
+:- func show_char(mgrid, point) = char.
 show_char(G, P) = C :- map.search_insert(P, 'X', OldV, G^map, _),
                        (
                            OldV = yes(C)
@@ -128,7 +128,7 @@ show_char(G, P) = C :- map.search_insert(P, 'X', OldV, G^map, _),
                            C = ('.')
                        ).
 
-:- func show_line(grid, int) = string.
+:- func show_line(mgrid, int) = string.
 show_line(G, Y) = string.from_char_list(map(func(X) = show_char(G, {X, Y}),
                                             list.reverse(int_range(G^size^width)))).
 

@@ -10,7 +10,7 @@
 
 :- type hint == {point, char}.
 
-:- pred solve(list(word)::in, list(hint)::in, size::in, grid::out) is nondet.
+:- pred solve(list(word)::in, list(hint)::in, size::in, mgrid::out) is nondet.
 
 :- implementation.
 
@@ -24,7 +24,7 @@ solve(Ws, [H | Hs], S, Gout) :-
     % TODO: check that all hints are satisfied.
     % TODO: check that no more than two words connect at any point
 
-:- pred solve1(list(word)::in, point::in, point::in, grid::in, grid::out) is nondet.
+:- pred solve1(list(word)::in, point::in, point::in, mgrid::in, mgrid::out) is nondet.
 solve1([], Ps, Pe, G, Gout) :- Pe = Ps,
                                Gout = G.
 solve1(Ws, Ps, Pe, G, Gout) :-
