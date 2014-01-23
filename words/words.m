@@ -19,6 +19,7 @@ main(!IO) :-
       io.write_string("\n", !IO).
 
 % helper function to test 'pick'
-:- pred test(list(char)::out) is nondet.
-test(R) :- examples.words_1(Xs),
-           util.pick(Xs, 't', R, _).
+:- pred test(string::out) is nondet.
+test(S) :- examples.words_1(Xs),
+           util.pick(Xs, 't', R, _),
+           util.to_string(R, S).
