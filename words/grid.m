@@ -26,7 +26,10 @@
 :- type dir == {int, int}.
 :- func dirs = list(dir).
 
-:- pred place_word(point::in, dir::in, list(char)::in, grid::in, grid::out) is semidet.
+% place the given word in the given direction, if no conflict;
+% sets output point to end of word
+:- pred place_word(point::in, dir::in, list(char)::in,
+                   grid::in, grid::out, point::out) is semidet.
 
 :- implementation.
 
@@ -66,8 +69,8 @@ dirs = solutions((pred(D::out) is nondet :- int.nondet_int_in_range(-1, 1, DX),
 :- func move(dir, point) = point.
 move({DX, DY}, {PX, PY}) = {PX + DX, PY + DY}.
 
-place_word(_, _, [], Gin, Gout) :- Gout = Gin.
-place_word(P, D, [C | Cs], Gin, Gout) :- place_char(P, C, Gin, G),
-                                         P1 = move(D, P),
-                                         place_word(P1, D, Cs, G, Gout).
-
+place_word(P, _, [C], Gin, Gout, Pend) :- place_char(P, C, Gin, Gout),
+                                          Pend = P.
+place_word(P, D, [C|[C1|Cs]], Gin, Gout, Pend) :- place_char(P, C, Gin, G),
+                                                  P1 = move(D, P),
+                                                  place_word(P1, D, [C1|Cs], G, Gout, Pend).
