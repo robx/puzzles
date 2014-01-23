@@ -206,4 +206,4 @@ test_show :-
     init(size(3, 3), G),
     place_char({0, 0}, 'a', G, G1),
     place_word({2, 0}, {-1, 1}, from_string("XYZ"), G1, G2, _),
-    show(G2) = ["Z__", "_Y_", "a_X"].
+    show(G2) = ["Z..", ".Y.", "a.X"].

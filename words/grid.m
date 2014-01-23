@@ -116,7 +116,7 @@ show_char(G, P) = C :- map.search_insert(P, 'X', OldV, G^map, _),
                            OldV = yes(C)
                        ;
                            OldV = no,
-                           C = '_'
+                           C = ('.')
                        ).
 
 :- func show_line(grid, int) = string.
