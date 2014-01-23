@@ -21,5 +21,5 @@ main(!IO) :-
 % helper function to test 'pick'
 :- pred test(string::out) is nondet.
 test(S) :- examples.words_1(Xs),
-           util.pick(Xs, 't', R, _),
+           util.pick_start(Xs, 't', R, _),
            util.to_string(R, S).
