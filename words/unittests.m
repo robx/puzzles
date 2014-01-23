@@ -26,7 +26,8 @@ main(!IO) :-
                "test_pick_cont_1_n" - bool.pred_to_bool(test_pick_cont_1_n),
                "test_grid_points" - bool.pred_to_bool(test_grid_points),
                "test_grid_bounds" - bool.pred_to_bool(test_grid_bounds),
-               "test_place_char" - bool.pred_to_bool(test_place_char)],
+               "test_place_char" - bool.pred_to_bool(test_place_char),
+               "test_char_at" - bool.pred_to_bool(test_char_at)],
       io.write(Tests, !IO),
       io.write_string("\n", !IO),
       Status = bool_to_int(bool.not(and_snd(Tests))),
@@ -105,3 +106,10 @@ test_place_char :- init(size(2, 2), G),
                    not place_char({1, 0}, 'C', G2, _),
                    place_char({0, 0}, 'A', G2, G3),
                    not place_char({2, 0}, 'D', G3, _).
+
+:- pred test_char_at is semidet.
+test_char_at :- init(size(2, 1), G),
+                not char_at(G, {0, 0}, _),
+                not char_at(G, {1, 1}, _),
+                place_char({0, 0}, 'A', G, G1),
+                char_at(G1, {0, 0}, 'A').

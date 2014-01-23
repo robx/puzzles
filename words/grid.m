@@ -16,6 +16,7 @@
 :- pred init(size::in, grid::out) is det.
 :- pred in_bounds(grid::in, point::in) is semidet.
 :- func points(grid) = set(point) is det.
+:- pred char_at(grid::in, point::in, char::out) is semidet.
 
 % set character at point to the given value, if there's nothing there
 % yet or the same character is already there
@@ -40,6 +41,9 @@ nondet_in_bounds(Grid, P) :- int.nondet_int_in_range(0, Grid^size^width - 1, X),
                              P = {X, Y}.
 
 points(Grid) = solutions_set(pred(P::out) is nondet :- nondet_in_bounds(Grid, P)).
+
+char_at(G, P, C) :- in_bounds(G, P),
+                    C = map.search(G^map, P).
 
 place_char(P, C, Gin, Gout) :- in_bounds(Gin, P),
                                grid(S, M) = Gin,
