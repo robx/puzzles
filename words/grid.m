@@ -110,6 +110,9 @@ place_word_char_any(P, W, C, Gin, Gout, Pstart, Pend) :-
 :- func int_range(int) = list(int).
 int_range(N) = (if N =< 0 then [] else [N - 1|int_range(N - 1)]).
 
+
+% TODO: this is the only way I found to substitute a character
+% just in case the key is not in the map...
 :- func show_char(grid, point) = char.
 show_char(G, P) = C :- map.search_insert(P, 'X', OldV, G^map, _),
                        (
