@@ -8,18 +8,22 @@
 
 :- import_module bool.
 :- import_module char.
+:- import_module int.
 :- import_module list.
 :- import_module pair.
 :- import_module set.
 :- import_module string.
 :- import_module solutions.
+
 :- import_module util.
 :- import_module examples.
+:- import_module grid.
 
 main(!IO) :-
       Tests = ["test_pick_1_t" - test_pick_1_t,
                "test_pick_1_x" - test_pick_1_x,
-               "test_pick_cont_1_n" - bool.pred_to_bool(test_pick_cont_1_n)],
+               "test_pick_cont_1_n" - bool.pred_to_bool(test_pick_cont_1_n),
+               "test_grid_bounds" - bool.pred_to_bool(test_grid_bounds)],
       io.write(Tests, !IO),
       io.write_string("\n", !IO),
       Status = bool_to_int(bool.not(and_snd(Tests))),
@@ -65,3 +69,24 @@ test_pick_cont_1_n :- solutions_set(
                           Sols
                       ),
                       Sols = set.set(["an", "aunt", "tint", "win"]).
+
+:- pred test_grid_bounds is semidet.
+test_grid_bounds :- init(size(3, 3), G),
+                    solutions_set(
+                        pred(P::out) is nondet :- (
+                            int.nondet_int_in_range(-2, 5, X),
+                            int.nondet_int_in_range(-2, 5, Y),
+                            P = {X, Y},
+                            in_bounds(G, P)
+                        ),
+                        Pin
+                    ),
+                    solutions_set(
+                        pred(P::out) is nondet :- (
+                            int.nondet_int_in_range(0, 2, X),
+                            int.nondet_int_in_range(0, 2, Y),
+                            P = {X, Y}
+                        ),
+                        Pgrid
+                    ),
+                    Pin = Pgrid.
