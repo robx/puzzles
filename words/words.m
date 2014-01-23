@@ -12,14 +12,14 @@
 :- import_module solutions.
 :- import_module util.
 :- import_module examples.
+:- import_module solve.
 
 main(!IO) :-
-      solutions(test, R),
-      io.write(R, !IO),
-      io.write_string("\n", !IO).
-
-% helper function to test 'pick'
-:- pred test(string::out) is nondet.
-test(S) :- examples.words_1(Xs),
-           util.pick_start(Xs, 't', R, _),
-           util.to_string(R, S).
+      S = examples.size_1,
+      Ws = examples.words_1,
+      Hs = examples.hints_1,
+      solutions(pred(G::out) is nondet :- solve(Ws, Hs, S, G),
+                Gs),
+      io.write_string("found ", !IO),
+      io.write(list.length(Gs) : int, !IO),
+      io.write_string(" solutions\n", !IO).

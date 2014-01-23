@@ -51,7 +51,7 @@ bool_to_int(no) = 0.
 
 % helper function to test 'pick_start'
 :- pred pick_1_t(string::out) is nondet.
-pick_1_t(S) :- examples.words_1(Xs),
+pick_1_t(S) :- Xs = examples.words_1,
                util.pick_start(Xs, 't', R, _),
                util.to_string(R, S).
 
@@ -62,7 +62,7 @@ test_pick_1_t = X :- if solutions_set(pick_1_t, S),
                      else X = no.
 
 :- pred pick_1_x(string::out) is nondet.
-pick_1_x(S) :- examples.words_1(Xs),
+pick_1_x(S) :- Xs = examples.words_1,
                util.pick_start(Xs, 'x', R, _),
                util.to_string(R, S).
 
@@ -75,7 +75,7 @@ test_pick_1_x = X :- if solutions_set(pick_1_x, S),
 :- pred test_pick_cont_1_n is semidet.
 test_pick_cont_1_n :- solutions_set(
                           pred(S::out) is nondet :- (
-                              examples.words_1(Xs),
+                              Xs = examples.words_1,
                               util.pick_cont(Xs, 'n', R, _),
                               util.to_string(R, S)
                           ),
