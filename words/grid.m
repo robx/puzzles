@@ -10,6 +10,8 @@
 :- import_module map.
 :- import_module set.
 
+:- import_module util.
+
 :- type size ---> size(width :: int, height :: int).
 :- type point == {int, int}.
 :- type grid ---> grid(size :: size, map :: map(point, char)).
@@ -28,7 +30,7 @@
 
 % place the given word in the given direction, if no conflict;
 % sets output point to end of word
-:- pred place_word(point::in, dir::in, list(char)::in,
+:- pred place_word(point::in, dir::in, word::in,
                    grid::in, grid::out, point::out) is semidet.
 
 :- implementation.

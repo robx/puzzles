@@ -5,21 +5,23 @@
 :- import_module list.
 :- import_module string.
 
+:- type word == list(char).
+
 % pick one from a list of words, optionally reversed,
 % that starts with the given letter
-:- pred pick_start(list(list(char))::in, char::in, 
-                   list(char)::out, list(list(char))::out) is nondet.
+:- pred pick_start(list(word)::in, char::in,
+                   word::out, list(word)::out) is nondet.
 
 % pick one from a list of words that contains the given letter
-:- pred pick_cont(list(list(char))::in, char::in, 
-                  list(char)::out, list(list(char))::out) is nondet.
+:- pred pick_cont(list(word)::in, char::in,
+                  word::out, list(word)::out) is nondet.
 
 % convert between lists of strings and lists of lists of chars.
-:- pred to_string(list(char)::in, string::out) is det.
-:- pred from_string(string::in, list(char)::out) is det.
-:- func from_string(string) = list(char).
-:- pred to_strings(list(list(char))::in, list(string)::out) is det.
-:- pred from_strings(list(string)::in, list(list(char))::out) is det.
+:- pred to_string(word::in, string::out) is det.
+:- pred from_string(string::in, word::out) is det.
+:- func from_string(string) = word.
+:- pred to_strings(list(word)::in, list(string)::out) is det.
+:- pred from_strings(list(string)::in, list(word)::out) is det.
 
 :- implementation.
 
@@ -36,4 +38,3 @@ from_string(A, B) :- string.to_char_list(A, B).
 from_string(A) = B :- from_string(A, B).
 to_strings(Xs, Ys) :- list.map(to_string, Xs, Ys).
 from_strings(Xs, Ys) :- list.map(from_string, Xs, Ys).
-
