@@ -31,7 +31,9 @@ main(!IO) :-
                "test_dirs" - bool.pred_to_bool(test_dirs),
                "test_place_word" - bool.pred_to_bool(test_place_word),
                "test_split_word" - bool.pred_to_bool(test_split_word),
-               "test_place_word_char" - bool.pred_to_bool(test_place_word_char)],
+               "test_place_word_char" - bool.pred_to_bool(test_place_word_char),
+               "test_place_word_any" - bool.pred_to_bool(test_place_word_any),
+               "test_place_word_char_any" - bool.pred_to_bool(test_place_word_char_any)],
       io.write(Tests, !IO),
       io.write_string("\n", !IO),
       Status = bool_to_int(bool.not(and_snd(Tests))),
@@ -165,3 +167,23 @@ test_place_word_char :-
     not place_word_char({0, 4}, {0, -1}, W, 'b', G1, _, _, _),
     place_word_char({0, 4}, {0, 1}, W, 'c', G1, _, {0, 1}, {0, 4}),
     not place_word_char({0, 3}, {0, 1}, W, 'c', G1, _, _, _).
+
+:- pred test_place_word_any is semidet.
+test_place_word_any :-
+    init(size(3, 3), G),
+    W = from_string("abc"),
+    place_char({2, 0}, 'd', G, G1),
+    solutions_set(pred(Pend::out) is nondet :- place_word_any({0, 0}, W, G1, _, Pend),
+                  Ps),
+    Ps = set.set([{2, 2}, {0, 2}]).
+
+:- pred test_place_word_char_any is semidet.
+test_place_word_char_any :-
+    init(size(3, 3), G),
+    W = from_string("abc"),
+    place_char({2, 0}, 'd', G, G1),
+    place_char({1, 2}, 'a', G1, G2),
+    solutions_set(pred(Pstart::out) is nondet :-
+                      place_word_char_any({1, 1}, W, 'b', G2, _, Pstart, _),
+                  Ps),
+    Ps = set.set([{0, 0}, {2, 1}, {2, 2}, {1, 2}, {0, 1}]).

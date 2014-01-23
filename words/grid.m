@@ -39,6 +39,12 @@
 :- pred place_word_char(point::in, dir::in, word::in, char::in,
                         grid::in, grid::out, point::out, point::out) is nondet.
 
+% variants that try any direction
+:- pred place_word_any(point::in, word::in,
+                       grid::in, grid::out, point::out) is nondet.
+:- pred place_word_char_any(point::in, word::in, char::in,
+                            grid::in, grid::out, point::out, point::out) is nondet.
+
 :- implementation.
 
 :- import_module maybe.
@@ -90,3 +96,11 @@ place_word_char(P, D, W, C, Gin, Gout, Pstart, Pend) :-
     util.split_word(W, C, W0, W1),
     place_word(P, rev(D), W0, Gin, G, Pstart),
     place_word(P, D, W1, G, Gout, Pend).
+
+place_word_any(P, W, Gin, Gout, Pend) :-
+    list.member(D, dirs),
+    place_word(P, D, W, Gin, Gout, Pend).
+
+place_word_char_any(P, W, C, Gin, Gout, Pstart, Pend) :-
+    list.member(D, dirs),
+    place_word_char(P, D, W, C, Gin, Gout, Pstart, Pend).
