@@ -29,7 +29,8 @@ main(!IO) :-
                "test_place_char" - bool.pred_to_bool(test_place_char),
                "test_char_at" - bool.pred_to_bool(test_char_at),
                "test_dirs" - bool.pred_to_bool(test_dirs),
-               "test_place_word" - bool.pred_to_bool(test_place_word)],
+               "test_place_word" - bool.pred_to_bool(test_place_word),
+               "test_split_word" - bool.pred_to_bool(test_split_word)],
       io.write(Tests, !IO),
       io.write_string("\n", !IO),
       Status = bool_to_int(bool.not(and_snd(Tests))),
@@ -138,3 +139,16 @@ test_place_word :- init(size(3, 2), G),
                    char_at(G2, {0, 1}, 'a'),
                    place_word({0, 0}, {1, 0}, W3, G2, G3, {2, 0}),
                    char_at(G3, {2, 0}, 'c').
+
+:- pred test_split_word is semidet.
+test_split_word :- W = from_string("abdefg"),
+                   split_word(W, 'b', from_string("ba"), from_string("bdefg")),
+                   not split_word(W, 'h', _, _),
+                   W1 = from_string("abac"),
+                   solutions_set(pred(R::out) is nondet :- (
+                                     split_word(W1, 'a', Ws, We),
+                                     R = {Ws, We}
+                                 ),
+                                 Sols),
+                   Sols = set.set([{from_string("a"), from_string("abac")},
+                                   {from_string("aba"), from_string("ac")}]).

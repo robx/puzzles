@@ -16,6 +16,11 @@
 :- pred pick_cont(list(word)::in, char::in,
                   word::out, list(word)::out) is nondet.
 
+% split a word at a given character, returning the reverse
+% start and the end (both including that character).
+:- pred split_word(word::in, char::in,
+                   word::out, word::out) is nondet.
+
 % convert between lists of strings and lists of lists of chars.
 :- pred to_string(word::in, string::out) is det.
 :- pred from_string(string::in, word::out) is det.
@@ -32,6 +37,14 @@ pick_start([X | Xs], C, Y, [X | Ys]) :- pick_start(Xs, C, Y, Ys).
 
 pick_cont([X | Xs], C, X, Xs)       :- list.member(C, X).
 pick_cont([X | Xs], C, Y, [X | Ys]) :- pick_cont(Xs, C, Y, Ys).
+
+:- pred split_word1(word::in, word::in, char::in, word::out, word::out).
+split_word1(_, [], _, _, _) :- false.
+split_word1(W0, [C | W1], C, [C | W0], [C | W1]).
+split_word1(W0, [C1 | W1], C, Wstart, Wend) :-
+    split_word1([C1 | W0], W1, C, Wstart, Wend).
+
+split_word(W, C, Wstart, Wend) :- split_word1([], W, C, Wstart, Wend).
 
 to_string(A, B) :- string.to_char_list(B, A).
 from_string(A, B) :- string.to_char_list(A, B).
