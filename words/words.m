@@ -17,9 +17,9 @@
 :- import_module grid.
 
 main(!IO) :-
-      S = examples.size_1,
-      Ws = examples.words_1,
-      Hs = examples.hints_1,
+      S = examples.size_2,
+      Ws = examples.words_2,
+      Hs = examples.hints_2,
       do_while(pred(G::out) is nondet :- solve(Ws, Hs, S, G),
                get_next,
                !IO).

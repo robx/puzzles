@@ -26,6 +26,7 @@
 :- pred from_string(string::in, word::out) is det.
 :- func from_string(string) = word.
 :- pred to_strings(list(word)::in, list(string)::out) is det.
+:- func from_strings(list(string)) = list(word).
 :- pred from_strings(list(string)::in, list(word)::out) is det.
 
 :- implementation.
@@ -51,3 +52,4 @@ from_string(A, B) :- string.to_char_list(A, B).
 from_string(A) = B :- from_string(A, B).
 to_strings(Xs, Ys) :- list.map(to_string, Xs, Ys).
 from_strings(Xs, Ys) :- list.map(from_string, Xs, Ys).
+from_strings(Xs) = Ys :- from_strings(Xs, Ys).
