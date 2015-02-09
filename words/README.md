@@ -13,18 +13,22 @@ Example
 
 Puzzle:
 
- +----+
- |    |  AN   WIN
- |   E|  AUNT WET
- |N   |  TINT
- |    |
- +----+
+```
++----+
+|    |  AN   WIN
+|   E|  AUNT WET
+|N   |  TINT
+|    |
++----+
+```
 
 Solution:
 
- +----+
- |AN T|
- |U IE|
- |NN W|
- |T   |
- +----+
+```
++----+
+|AN T|
+|U IE|
+|NN W|
+|T   |
++----+
+```
