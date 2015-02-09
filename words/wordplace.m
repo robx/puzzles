@@ -2,7 +2,14 @@
 % [libmap]: http://www.mercurylang.org/information/doc-release/mercury_library/map.html
 % [libpair]: http://www.mercurylang.org/information/doc-release/mercury_library/pair.html
 % [libsol]: http://www.mercurylang.org/information/doc-release/mercury_library/solutions.html
+% [github]: https://github.com/robx/puzzles/raw/master/words/wordplace.m
 
+% ### The header
+%
+% If you paste all the code from this post into a file `wordplace.m`
+% (or download it from [github][github]), you can compile it with
+% `mmc --make wordplace`, then run `./wordplace`.
+%
 % We start with a standard header section, which states that all
 % we're exporting is the `main` predicate, and which imports a bunch
 % of modules from the [standard library][lib].
@@ -27,7 +34,7 @@
 :- import_module string.
 %%
 
-% == Types and data ==
+% ### Types and data
 %
 % Next, we define some types in order to be able to express
 % the puzzle. We're working with a two-dimensional square
@@ -87,7 +94,7 @@ sample = P :-
 :- type grid ---> grid(size :: size, map :: map(point, char)).
 %%
 
-% == An outline, and `main` ==
+% ### An outline, and `main`
 %
 % Now we're ready to declare the core of our solver:
 
@@ -150,7 +157,7 @@ main(IO_in, IO_out) :-
 % the beginning. That said, it's helpful to order definitions
 % in a way that they can be evaluated top-to-bottom.
 
-% == Solving the puzzle ==
+% ### Solving the puzzle
 %
 % We'll let the grid do most of the work. First, let's set it
 % up properly, by setting the size and initializing the
@@ -283,7 +290,7 @@ solve(Pz, Gout) :-
     place_word_any(W, G1, Gout).
 %%
 
-% == Printing the solutions ==
+% ### Printing the solutions
 %
 % To finish off the program, we still need to implement
 % `print_grids`. That's below, with some code that feels
