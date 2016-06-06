@@ -6,7 +6,7 @@
 #include <pthread.h>
 
 #define N 3
-#define T N
+#define T 1
 #define M 1000
 
 #define D (2*N-1)
@@ -87,19 +87,19 @@ int clueN(char g[N+2][N+2], int x, int y, int dx, int dy) {
 void clues(char g[N+2][N+2]) {
 	int x, y;
 	x = 0;
-	for (y = 1; y <= 4; y++) {
+	for (y = 1; y <= N; y++) {
 		g[y][x] = clueN(g, x, y, 1, 0);
 	}
-	x = 4;
-	for (y = 1; y <= 4; y++) {
+	x = N+1;
+	for (y = 1; y <= N; y++) {
 		g[y][x] = clueN(g, x, y, -1, 0);
 	}
 	y = 0;
-	for (x = 1; x <= 4; x++) {
+	for (x = 1; x <= N; x++) {
 		g[y][x] = clueN(g, x, y, 0, 1);
 	}
-	y = 4;
-	for (x = 1; x <= 4; x++) {
+	y = N+1;
+	for (x = 1; x <= N; x++) {
 		g[y][x] = clueN(g, x, y, 0, -1);
 	}
 }
@@ -108,6 +108,21 @@ void allclues() {
 	int i;
 	for (i = 0; i < nl; i++) {
 		clues(latin[i]);
+	}
+}
+
+void printg(char g[N+2][N+2]) {
+	int  x, y;
+	for (y = 0; y <= N+1; y++) {
+		for (x = 0; x <= N+1; x++) {
+			if ((x == 0 && y == 0) || (x == N+1 && y == 0)
+				|| (x == 0 && y == N+1) || (x == N+1 && y == N+1)) {
+				printf(" ");
+			} else {
+				printf("%d", g[y][x]);
+			}
+		}
+		printf("\n");
 	}
 }
 
@@ -138,8 +153,7 @@ int def1(grid g, int ix) {
 	int x0, y0, dx, dy;
 	int i;
 	int d = 0;
-	int cur = g[ix], prev = g[(ix - 1) % 4], next = g[(ix + 1) % 4];
-
+	int cur = g[ix], prev = g[(ix - 1 + 4) % 4], next = g[(ix + 1) % 4];
 	switch (ix) {
 	case 0:
 		x0 = N;
@@ -148,20 +162,20 @@ int def1(grid g, int ix) {
 		dy = 0;
 		break;
 	case 1:
-		x0 = 0;
+		x0 = 1;
 		y0 = N;
 		dx = 0;
 		dy = -1;
 		break;
 	case 2:
-		x0 = 0;
-		y0 = 0;
+		x0 = 1;
+		y0 = 1;
 		dx = 1;
 		dy = 0;
 		break;
 	case 3:
 		x0 = N;
-		y0 = 0;
+		y0 = 1;
 		dx = 0;
 		dy = 1;
 		break;
@@ -172,9 +186,10 @@ int def1(grid g, int ix) {
 	for (i = N-1; i >= 0; i--) {
 		x = x0 + i*dx;
 		y = y0 + i*dy;
+		opx = x - N*dy;
 		opy = y + N*dx;
-		opx = x + N*dy;
 		c = latin[prev][opy][opx];
+//		printf("x,y %d,%d xop,yop %d,%d v,c %d,%d\n", x, y, opx, opy, latin[cur][y][x], c);
 		d <<= 1;
 		d |= c == latin[cur][y][x];
 	}
@@ -187,6 +202,7 @@ int def1(grid g, int ix) {
 		opy = y - N*dx;
 		opx = x + N*dy;
 		c = latin[next][opy][opx];
+//		printf("x,y %d,%d xop,yop %d,%d v,c %d,%d\n", x, y, opx, opy, latin[cur][y][x], c);
 		if (i == 0) {
 			if ((c == latin[cur][y][x]) ^ ((d&1) == 1)) {
 				return -1;
@@ -204,6 +220,7 @@ int def(grid g) {
 	int d2 = def1(g, 1);
 	int d3 = def1(g, 2);
 	int d4 = def1(g, 3);
+//	printf("defs: %d %d %d %d\n", d1, d2, d3, d4);
 	if (d1 < 0 || d2 < 0 || d3 < 0 || d4 < 0) {
 		return -1;
 	}
@@ -226,19 +243,10 @@ void printdef(int d) {
 
 grid gs[T];
 
-void printg(int t) {
-	int i, x, y;
+void printgs(grid g) {
+	int i;
 	for (i = 0; i < 4; i++) {
-		for (y = 0; y <= N+1; y++) {
-			for (x = 0; x <= N+1; x++) {
-				if ((x == 0 && y == 0) || (x == N+1 && y == 0) || (x == 0 && y == N+1) || (x == N+1 && y == N+1)) {
-					printf(" ");
-				} else {
-					printf("%d", latin[gs[t][i]][y][x]);
-				}
-			}
-			printf("\n");
-		}
+		printg(latin[g[i]]);
 		printf("\n");
 	}
 }
@@ -246,7 +254,7 @@ void printg(int t) {
 void solve(int t, int d) {
 	if (d == 4) {
 //		printf("found\n");
-//		printg(t);
+//		printgs(gs[t]);
 		found[t]++;
 		int d = def(gs[t]);
 //		printdef(d);
