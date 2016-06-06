@@ -5,24 +5,54 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define N 4
+#define N 3
 #define T N
+#define M 1000
 
 #define D (2*N-1)
 #define E (4*D)
 
-char defs[T][1 << E];
+char latin[M][N+2][N+2];
+char lg[N][N];
+int nl;
 
-int found[T];
+void solvel(int x, int y) {
+	if (y >= N) {
+		int i, j;
+		for (i = 0; i < N; i++) {
+			for (j = 0; j < N; j++) {
+				latin[nl][i+1][j+1] = lg[i][j];
+			}
+		}
+		nl++;
+		return;
+	}
 
-void logdef(int t, int d) {
-	switch (defs[t][d]) {
-	case 0:
-		defs[t][d] = 1;
-		break;
-	case 1:
-		defs[t][d] = 2;
-		break;
+	int i;
+	int cands[N+1];
+	for (i = 1; i <= N; i++) {
+		cands[i] = 1;
+	}
+	for (i = 0; i < x; i++) {
+		cands[lg[y][i]] = 0;
+	}
+	for (i = 0; i < y; i++) {
+		cands[lg[i][x]] = 0;
+	}
+
+	int xn, yn;
+	xn = x + 1;
+	yn = y;
+	if (xn >= N) {
+		xn = 0;
+		yn++;
+	}
+	for (i = 1; i <= N; i++) {
+		if (!cands[i]) {
+			continue;
+		}
+		lg[y][x] = i;
+		solvel(xn, yn);
 	}
 }
 
@@ -40,17 +70,112 @@ int clue(char g[2*N][2*N], int x, int y, int dx, int dy) {
 	return c;
 }
 
-int def1(char g[2*N][2*N], int dx, int dy, int x0, int y0) {
-	int d = 0;
-	int x, y;
+int clueN(char g[N+2][N+2], int x, int y, int dx, int dy) {
+	int h = 0, l;
 	int i;
+	int c = 0;
+	for (i = 1; i <= N; i++) {
+		l = g[y+i*dy][x+i*dx];
+		if (l > h) {
+			h = l;
+			c++;
+		}
+	}
+	return c;
+}
+
+void clues(char g[N+2][N+2]) {
+	int x, y;
+	x = 0;
+	for (y = 1; y <= 4; y++) {
+		g[y][x] = clueN(g, x, y, 1, 0);
+	}
+	x = 4;
+	for (y = 1; y <= 4; y++) {
+		g[y][x] = clueN(g, x, y, -1, 0);
+	}
+	y = 0;
+	for (x = 1; x <= 4; x++) {
+		g[y][x] = clueN(g, x, y, 0, 1);
+	}
+	for (x = 1; x <= 4; x++) {
+		g[y][x] = clueN(g, x, y, 0, -1);
+	}
+}
+
+void allclues() {
+	int i;
+	for (i = 0; i < nl; i++) {
+		clues(latin[i]);
+	}
+}
+
+void prep() {
+	solvel(0, 0);
+	printf("computed %d latin squares\n", nl);
+	allclues();
+}
+
+char defs[T][1 << E];
+
+long found[T];
+
+void logdef(int t, int d) {
+	switch (defs[t][d]) {
+	case 0:
+		defs[t][d] = 1;
+		break;
+	case 1:
+		defs[t][d] = 2;
+		break;
+	}
+}
+
+typedef int grid[4]; // tl, tr, br, bl
+
+int def1(grid g, int ix) {
+	int x0, y0, dx, dy;
+	int i;
+	int d = 0;
+	int cur = g[ix], prev = g[(ix - 1) % 4], next = g[(ix + 1) % 4];
+
+	switch (ix) {
+	case 0:
+		x0 = N;
+		y0 = N;
+		dx = -1;
+		dy = 0;
+		break;
+	case 1:
+		x0 = 0;
+		y0 = N;
+		dx = 0;
+		dy = -1;
+		break;
+	case 2:
+		x0 = 0;
+		y0 = 0;
+		dx = 1;
+		dy = 0;
+		break;
+	case 3:
+		x0 = N;
+		y0 = 0;
+		dx = 0;
+		dy = 1;
+		break;
+	}
+
+	int x, y, opx, opy;
 	int c;
 	for (i = N-1; i >= 0; i--) {
 		x = x0 + i*dx;
 		y = y0 + i*dy;
-		c = clue(g, x, y, dy, -dx);
+		opy = y + N*dx;
+		opx = x + N*dy;
+		c = latin[prev][opy][opx];
 		d <<= 1;
-		d |= c == g[y][x];
+		d |= c == latin[cur][y][x];
 	}
 	i = dx;
 	dx = -dy;
@@ -58,24 +183,26 @@ int def1(char g[2*N][2*N], int dx, int dy, int x0, int y0) {
 	for (i = 0; i <= N-1; i++) {
 		x = x0 + i*dx;
 		y = y0 + i*dy;
-		c = clue(g, x, y, -dy, dx);
+		opy = y - N*dx;
+		opx = x + N*dy;
+		c = latin[next][opy][opx];
 		if (i == 0) {
-			if ((c == g[y][x]) ^ ((d&1) == 1)) {
+			if ((c == latin[cur][y][x]) ^ ((d&1) == 1)) {
 				return -1;
 			}
 		} else {
 			d <<= 1;
-			d |= c == g[y][x];
+			d |= c == latin[cur][y][x];
 		}
 	}
 	return d;
 }
 
-int def(char g[2*N][2*N]) {
-	int d1 = def1(g, -1, 0, N-1, N-1);
-	int d2 = def1(g, 0, -1, N, N-1);
-	int d3 = def1(g, 1, 0, N, N);
-	int d4 = def1(g, 0, 1, N-1, N);
+int def(grid g) {
+	int d1 = def1(g, 0);
+	int d2 = def1(g, 1);
+	int d3 = def1(g, 2);
+	int d4 = def1(g, 3);
 	if (d1 < 0 || d2 < 0 || d3 < 0 || d4 < 0) {
 		return -1;
 	}
@@ -92,27 +219,14 @@ void printdef(int d) {
 
 #define R (4*N*N)
 
-char g[T][2*N][2*N];
+grid gs[T];
 
-void printg(int t) {
-	int i, j;
-	for (i = 0; i < 2*N; i++) {
-		for (j = 0; j < 2*N; j++) {
-			printf("%c", g[t][i][j] + '0');
-		}
-		printf("\n");
-	}
-}
-
-void solve(int t, int x, int y) {
-	if (x == 0 && y == 1) {
-		printf("%d\n", t);
-	}
-	if (y >= 2*N) {
+void solve(int t, int d) {
+	if (d == 4) {
 //		printf("found\n");
 //		printg();
 		found[t]++;
-		int d = def(g[t]);
+		int d = def(gs[t]);
 		if (d >= 0) {
 //			printdef(d);
 			logdef(t, d);
@@ -120,50 +234,35 @@ void solve(int t, int x, int y) {
 		return;
 	}
 
-	int i;
-	int cands[N+1];
-	for (i = 1; i <= N; i++) {
-		cands[i] = 1;
-	}
-	for (i = x/N*N; i < x; i++) {
-		cands[g[t][y][i]] = 0;
-	}
-	for (i = y/N*N; i < y; i++) {
-		cands[g[t][i][x]] = 0;
+	int i = 0;
+	int step = 1;
+	if (d == 0) {
+		i = t;
+		step = T;
 	}
 
-	int xn, yn;
-	xn = x + 1;
-	yn = y;
-	if (xn >= 2*N) {
-		xn = 0;
-		yn++;
-	}
-	for (i = 1; i <= N; i++) {
-		if (!cands[i]) {
-			continue;
-		}
-		g[t][y][x] = i;
-		solve(t, xn, yn);
+	for (; i < nl; i++) {
+		gs[t][d] = i;
+		solve(t, d+1);
 	}
 }
 
 void handle(int sig) {
-	int f = 0;
+	long f = 0;
 	int i;
 	for (i = 0; i < T; i++) {
 		f += found[i];
 	}
-	fprintf(stderr, "found %d\n", f);
+	fprintf(stderr, "found %ld\n", f);
 	if (sig == SIGINT) {
 		exit(1);
 	}
 }
 
-void *solve10(void *threadid) {
+void *solve0(void *threadid) {
 	long t;
 	t = (int)threadid;
-	solve(t, 1, 0);
+	solve(t, 0);
 	pthread_exit((void*)t);
 }
 
@@ -174,12 +273,13 @@ int main(int argc, char **argv) {
 	pthread_t threads[T];
 	pthread_attr_t attr;
 
+	prep();
+
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
 	for (t = 0; t < T; t++) {
-		g[t][0][0] = t + 1;
-		pthread_create(&threads[t], &attr, solve10, (void *)t);
+		pthread_create(&threads[t], &attr, solve0, (void *)t);
 	}
 	pthread_attr_destroy(&attr);
 	for (t = 0; t < T; t++) {
