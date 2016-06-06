@@ -98,6 +98,7 @@ void clues(char g[N+2][N+2]) {
 	for (x = 1; x <= 4; x++) {
 		g[y][x] = clueN(g, x, y, 0, 1);
 	}
+	y = 4;
 	for (x = 1; x <= 4; x++) {
 		g[y][x] = clueN(g, x, y, 0, -1);
 	}
@@ -210,6 +211,10 @@ int def(grid g) {
 }
 
 void printdef(int d) {
+	if (d < 0) {
+		printf("invalid\n");
+		return;
+	}
 	int i;
 	for (i = E-1; i >= 0; i--) {
 		printf("%c", (d >> i & 1) ? '*' : '.');
@@ -221,14 +226,31 @@ void printdef(int d) {
 
 grid gs[T];
 
+void printg(int t) {
+	int i, x, y;
+	for (i = 0; i < 4; i++) {
+		for (y = 0; y <= N+1; y++) {
+			for (x = 0; x <= N+1; x++) {
+				if ((x == 0 && y == 0) || (x == N+1 && y == 0) || (x == 0 && y == N+1) || (x == N+1 && y == N+1)) {
+					printf(" ");
+				} else {
+					printf("%d", latin[gs[t][i]][y][x]);
+				}
+			}
+			printf("\n");
+		}
+		printf("\n");
+	}
+}
+
 void solve(int t, int d) {
 	if (d == 4) {
 //		printf("found\n");
-//		printg();
+//		printg(t);
 		found[t]++;
 		int d = def(gs[t]);
+//		printdef(d);
 		if (d >= 0) {
-//			printdef(d);
 			logdef(t, d);
 		}
 		return;
@@ -241,7 +263,7 @@ void solve(int t, int d) {
 		step = T;
 	}
 
-	for (; i < nl; i++) {
+	for (; i < nl; i += step) {
 		gs[t][d] = i;
 		solve(t, d+1);
 	}
@@ -295,5 +317,6 @@ int main(int argc, char **argv) {
 			printdef(i);
 		}
 	}
+	handle(0);
 	pthread_exit(NULL);
 }
