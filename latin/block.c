@@ -56,20 +56,6 @@ void solvel(int x, int y) {
 	}
 }
 
-int clue(char g[2*N][2*N], int x, int y, int dx, int dy) {
-	int h = 0, l;
-	int i;
-	int c = 0;
-	for (i = 1; i <= N; i++) {
-		l = g[y+i*dy][x+i*dx];
-		if (l > h) {
-			h = l;
-			c++;
-		}
-	}
-	return c;
-}
-
 int clueN(char g[N+2][N+2], int x, int y, int dx, int dy) {
 	int h = 0, l;
 	int i;
@@ -111,24 +97,8 @@ void allclues() {
 	}
 }
 
-void printg(char g[N+2][N+2]) {
-	int  x, y;
-	for (y = 0; y <= N+1; y++) {
-		for (x = 0; x <= N+1; x++) {
-			if ((x == 0 && y == 0) || (x == N+1 && y == 0)
-				|| (x == 0 && y == N+1) || (x == N+1 && y == N+1)) {
-				printf(" ");
-			} else {
-				printf("%d", g[y][x]);
-			}
-		}
-		printf("\n");
-	}
-}
-
 void prep() {
 	solvel(0, 0);
-	printf("computed %d latin squares\n", nl);
 	allclues();
 }
 
@@ -189,7 +159,6 @@ int def1(grid g, int ix) {
 		opx = x - N*dy;
 		opy = y + N*dx;
 		c = latin[prev][opy][opx];
-//		printf("x,y %d,%d xop,yop %d,%d v,c %d,%d\n", x, y, opx, opy, latin[cur][y][x], c);
 		d <<= 1;
 		d |= c == latin[cur][y][x];
 	}
@@ -202,7 +171,6 @@ int def1(grid g, int ix) {
 		opy = y - N*dx;
 		opx = x + N*dy;
 		c = latin[next][opy][opx];
-//		printf("x,y %d,%d xop,yop %d,%d v,c %d,%d\n", x, y, opx, opy, latin[cur][y][x], c);
 		if (i == 0) {
 			if ((c == latin[cur][y][x]) ^ ((d&1) == 1)) {
 				return -1;
@@ -220,7 +188,6 @@ int def(grid g) {
 	int d2 = def1(g, 1);
 	int d3 = def1(g, 2);
 	int d4 = def1(g, 3);
-//	printf("defs: %d %d %d %d\n", d1, d2, d3, d4);
 	if (d1 < 0 || d2 < 0 || d3 < 0 || d4 < 0) {
 		return -1;
 	}
@@ -243,21 +210,10 @@ void printdef(int d) {
 
 grid gs[T];
 
-void printgs(grid g) {
-	int i;
-	for (i = 0; i < 4; i++) {
-		printg(latin[g[i]]);
-		printf("\n");
-	}
-}
-
 void solve(int t, int d) {
 	if (d == 4) {
-//		printf("found\n");
-//		printgs(gs[t]);
 		found[t]++;
 		int d = def(gs[t]);
-//		printdef(d);
 		if (d >= 0) {
 			logdef(t, d);
 		}
