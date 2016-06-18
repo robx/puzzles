@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define N 3
-#define T 1
+#define N 4
+#define T 4
 #define M 1000
 
 #define D (2*N-1)
