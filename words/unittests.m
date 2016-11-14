@@ -38,8 +38,9 @@ main(!IO) :-
                "test_place_word_char_any" - bool.pred_to_bool(test_place_word_char_any),
                "test_solve_1" - bool.pred_to_bool(test_solve_1),
                "test_show" - bool.pred_to_bool(test_show)],
-      io.write(Tests, !IO),
-      io.write_string("\n", !IO),
+      foldl((pred((L - B)::in, IO0::di, IO::uo)  is det :-
+          io.format("%s:\t%s\n", [s(L), s(string(B))], IO0, IO)
+        ), Tests, !IO),
       Status = bool_to_int(bool.not(and_snd(Tests))),
       io.set_exit_status(Status, !IO).
 
