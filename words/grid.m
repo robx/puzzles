@@ -153,12 +153,9 @@ int_range(N) = (if N =< 0 then [] else [N - 1|int_range(N - 1)]).
 
 :- func show_char(T, point) = char <= (grid(T)).
 show_char(G, P) = C :-
-    solutions(pred(X::out) is nondet :- char_at(G, P, X),
-              Cs),
-    (
-        Cs = [C | _]
-    ;
-        Cs = [],
+    ( if char_at(G, P, CPrime) then
+        C = CPrime
+    else
         C = ('.')
     ).
 

@@ -26,12 +26,10 @@ main(!IO) :-
 
 :- pred get_next(hgrid::in, bool::out, io::di, io::uo) is det.
 get_next(G, More, !IO) :-
-    write_lines(show(G), !IO),
+    foldl(write_on_line, show(G), !IO),
     io.write_string("\n", !IO),
     More = yes.
 
-:- pred write_lines(list(string)::in, io::di, io::uo) is det.
-write_lines([], !IO).
-write_lines([L|Ls], !IO) :- io.write_string(L, !IO),
-                            io.write_string("\n", !IO),
-                            write_lines(Ls, !IO).
+:- pred write_on_line(string::in, io::di, io::uo) is det.
+write_on_line(L, !IO) :- io.format("%s\n", [s(L)], !IO).
+
