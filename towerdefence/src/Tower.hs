@@ -122,7 +122,7 @@ countEqual ::
   [(Int, x)] ->
   [Prop m (f x)] ->
   Prop m (f v)
-countEqual vals cells = foldl (.+) (lift 0) (map f vals)
+countEqual vals cells = foldr (.+) (lift 0) (map f vals)
   where
     isEqual v w = if w == v then 1 else 0
     f (i, v) = isEqual v .$ (cells !! i)
