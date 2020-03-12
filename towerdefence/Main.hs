@@ -1,6 +1,7 @@
 module Main where
 
 import Data.Holmes
+import Puzzles
 import Tower
 
 main :: IO ()
