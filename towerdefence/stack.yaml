@@ -1,0 +1,6 @@
+resolver: lts-15.3
+packages:
+- .
+extra-deps:
+- holmes-0.2.0.0@sha256:e64089c76112d2218770a13a78b6a73ea2cd13367777a597eef0f6675d8fc7ae,4505
+
