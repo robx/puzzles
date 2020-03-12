@@ -5,7 +5,7 @@ module Main where
 import Data.Holmes
 import Data.JoinSemilattice.Intersect (fromList, singleton)
 import Data.Propagator (lift)
-import Test.Hspec (describe, hspec, it, shouldBe)
+import Test.Hspec (describe, hspec, it, pendingWith, shouldBe)
 import Tower
 import TowerIntersect
 
@@ -28,3 +28,10 @@ main = hspec do
           prop _ = lift (singleton 0) .>= lift (singleton (1 :: Val4))
       result <- cfg `satisfying` prop
       result `shouldBe` Nothing
+  describe "countEqual" do
+    it "should allow counting one candidate with Intersect" do
+      pendingWith "hangs / overflows"
+      let cfg = 1 `from` [1] :: Config Holmes (Intersect Val4)
+          prop cells = countEqual [(0, 3 :: Val4)] cells .>= lift (singleton (0 :: Val4))
+      result <- cfg `satisfying` prop
+      result `shouldBe` Just [fromList [1 :: Val4]]
