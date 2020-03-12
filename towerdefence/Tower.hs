@@ -51,6 +51,18 @@ data Cell v = Cell {value :: v, tower :: Bool}
   deriving stock (Eq, Ord, Show, Generic)
   deriving anyclass (Hashable)
 
+instance Enum v => Enum (Cell v) where
+
+  toEnum n = let (v, t) = n `divMod` 2 in Cell (toEnum v) (toEnum t)
+
+  fromEnum (Cell v t) = 2 * (fromEnum v) + fromEnum t
+
+instance Bounded v => Bounded (Cell v) where
+
+  minBound = Cell minBound minBound
+
+  maxBound = Cell maxBound maxBound
+
 -- | List all potential attackers for a given square:
 --   x attacks y iff (x, value at x) `elem` attackers board y
 attackers :: Num v => Board -> Coord -> [(Coord, Cell v)]
