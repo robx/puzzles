@@ -15,26 +15,37 @@ import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 import Tower hiding (showSolution)
 
-data Val4 = V4 Int
-  deriving stock (Eq, Ord, Show, Generic)
+-- | Value type for 4x4 tower defence puzzle.
+--
+-- We allow 0..4 so that we can compare with 0
+-- as an attacker count.
+newtype Val4 = V4 Int
+  deriving stock (Show, Eq, Ord, Generic)
   deriving anyclass (Hashable)
 
 instance Num Val4 where
-  fromInteger = toEnum . pred . fromInteger
+
+  fromInteger = toEnum . fromInteger
+
+  -- this is not a valid Num instance, we just want to use
+  -- it for counting
+  (V4 a) + (V4 b) = if a + b > 4 then V4 4 else V4 (a + b)
 
 instance Enum Val4 where
 
   toEnum n
-    | n < 0 || n >= 4 = error "Val4 out of bounds"
-    | otherwise = V4 (n + 1)
+    | n < 0 || n > 4 = error $ "toEnum Val4 out of bounds: " ++ show n
+    | otherwise = V4 n
 
-  fromEnum (V4 m) = m - 1
+  fromEnum v@(V4 m)
+    | m < 0 || m > 4 = error $ "fromEnum Val4 out of bounds: " ++ show v
+    | otherwise = m
 
 instance Bounded Val4 where
 
   minBound = toEnum 0
 
-  maxBound = toEnum 3
+  maxBound = toEnum 4
 
 {-
   Encoding the board for Holmes
