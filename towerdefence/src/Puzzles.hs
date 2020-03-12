@@ -10,6 +10,48 @@ import Tower
   Sample puzzles
 -}
 
+config3 :: Config Holmes (Defined (Cell Int))
+config3 = definedConfig (Board 3)
+
+{-
+
+  (.) 2  .
+   .  .  .
+   .  .  .
+
+
+   1  2  3
+   3  1  2
+   2  3  1
+
+-}
+
+-- restricted to Defined because `givens` uses `pure` to create single values to test against
+puzzle3 :: forall m. MonadCell m => [Prop m (Defined (Cell Int))] -> Prop m (Defined Bool)
+puzzle3 cells =
+  and'
+    [ and' (map (\(c, v) -> givenNum (toIndex board c) v cells) givens),
+      and' (map (\i -> isTower i cells) towerIndexes),
+      and' (map (\i -> not' $ isTower i cells) nonTowerIndexes),
+      latinSquare' board cells,
+      and' (map towerConstraint' towers)
+    ]
+  where
+    board = Board 3
+    givens = [(Coord 1 0, 2)]
+    towers = [Coord 0 0]
+    towerIndexes = map (toIndex board) towers
+    nonTowerIndexes = filter (not . flip elem towerIndexes) (boardIndexes board)
+    towerConstraint' coord = towerConstraint board coord cells
+
+puzzle1 cells = towerConstraint (Board 1) (Coord 0 0) cells
+
+puzzle2 cells =
+  and'
+    [ latinSquare' (Board 2) cells,
+      towerConstraint (Board 2) (Coord 0 0) cells
+    ]
+
 -- let's start with our 4x4 puzzle:
 {-
   .OO.

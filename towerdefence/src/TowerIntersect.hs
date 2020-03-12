@@ -55,6 +55,10 @@ intersectConfig :: Board -> Config Holmes (Intersect (Cell Val4))
 intersectConfig (Board n) =
   case n of
     4 -> (n * n) `from` [Cell v t | v <- [1 .. 4], t <- [False, True]]
+    -- 1..3 fits in Val4...
+    3 -> (n * n) `from` [Cell v t | v <- [1 .. 3], t <- [False, True]]
+    2 -> (n * n) `from` [Cell v t | v <- [1 .. 2], t <- [False, True]]
+    1 -> (n * n) `from` [Cell v t | v <- [1 .. 1], t <- [False, True]]
     _ -> error "board size not implemented"
 
 {-
