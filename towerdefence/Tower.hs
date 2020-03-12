@@ -1,11 +1,16 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Tower where
 
+import Data.Hashable (Hashable)
 import Data.Holmes
 import Data.List (transpose)
 import Data.Maybe (mapMaybe)
 import Data.Propagator
+import GHC.Generics (Generic)
 
 {-
   General puzzle board things.
@@ -42,16 +47,15 @@ cols board = transpose . rows board
   Encoding tower defence
 -}
 
-type Cell =
-  ( Int, -- number in cell, 1..n
-    Bool -- cell has a circle, a.k.a. cell is a tower
-  )
+data Cell v = Cell {value :: v, tower :: Bool}
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving anyclass (Hashable)
 
 -- | List all potential attackers for a given square:
 --   x attacks y iff (x, value at x) `elem` attackers board y
-attackers :: Board -> Coord -> [(Coord, Cell)]
+attackers :: Num v => Board -> Coord -> [(Coord, Cell v)]
 attackers b@(Board n) (Coord r c) =
-  map (\(c, v) -> (c, (v, False))) $ filter (\(c, v) -> inBoard b c) $
+  map (\(c, v) -> (c, Cell (fromIntegral v) False)) $ filter (\(c, v) -> inBoard b c) $
     [(Coord (r - i) c, i) | i <- [1 .. n]]
       ++ [(Coord (r + i) c, i) | i <- [1 .. n]]
       ++ [(Coord r (c - i), i) | i <- [1 .. n]]
@@ -61,51 +65,95 @@ attackers b@(Board n) (Coord r c) =
   Encoding the board for Holmes
 -}
 
-definedConfig :: Board -> Config Holmes (Defined Cell)
-definedConfig (Board n) = (n * n) `from` [(v, c) | v <- [1 .. n], c <- [True, False]]
+definedConfig :: Board -> Config Holmes (Defined (Cell Int))
+definedConfig (Board n) = (n * n) `from` [Cell v c | v <- [1 .. n], c <- [True, False]]
 
 -- | Project from Cell to the number in the cell
-toNum :: Prop m (Defined Cell) -> Prop m (Defined Int)
-toNum p = over (fmap fst) p
+toNum ::
+  (Merge (f (Cell v)), Merge (f v), Functor f) =>
+  Prop m (f (Cell v)) ->
+  Prop m (f v)
+toNum p = over (fmap value) p
 
 -- | Project from Cell to the isTower flag
-toTower :: Prop m (Defined Cell) -> Prop m (Defined Bool)
-toTower p = over (fmap snd) p
+toTower ::
+  (Merge (f (Cell v)), Merge (f Bool), Functor f) =>
+  Prop m (f (Cell v)) ->
+  Prop m (f Bool)
+toTower p = over (fmap tower) p
 
 {-
   Puzzle rules as constraints
 -}
 
 -- | Prescribe the number value at the given index.
-givenNum :: Index -> Int -> forall m. MonadCell m => [Prop m (Defined Cell)] -> Prop m (Defined Bool)
+givenNum ::
+  ( EqR (f v) (f Bool),
+    MonadCell m,
+    Applicative f,
+    Merge (f (Cell v))
+  ) =>
+  Index ->
+  v ->
+  [Prop m (f (Cell v))] ->
+  Prop m (f Bool)
 givenNum i v cells = toNum (cells !! i) .== lift (pure v)
 
 -- | There is a tower at the given index.
-isTower :: Index -> [Prop m (Defined Cell)] -> Prop m (Defined Bool)
+isTower ::
+  (Merge (f (Cell v)), Merge (f Bool), Functor f) =>
+  Index ->
+  [Prop m (f (Cell v))] ->
+  Prop m (f Bool)
 isTower i cells = toTower (cells !! i)
 
 -- given a list of values at indexes, count how many of these occur
 countEqual ::
-  (Eq x, MonadCell m) =>
-  [(Index, x)] ->
-  [Prop m (Defined x)] ->
-  Prop m (Defined Int)
+  ( SumR (f w),
+    MonadCell m,
+    Num w,
+    Num (f w),
+    Eq v,
+    Functor f,
+    Merge (f v)
+  ) =>
+  [(Index, v)] ->
+  [Prop m (f v)] ->
+  Prop m (f w)
 countEqual vals cells =
   foldl (.+) (lift 0) (map f vals)
   where
     isEqual v w = if w == v then 1 else 0
     f (i, v) = fmap (isEqual v) `over` (cells !! i)
 
-towerConstraint :: Board -> Coord -> forall m. MonadCell m => [Prop m (Defined Cell)] -> Prop m (Defined Bool)
+towerConstraint ::
+  ( OrdR (f v) (f Bool),
+    SumR (f v),
+    MonadCell m,
+    Num v,
+    Num (f v),
+    Eq v,
+    Functor f,
+    Merge (f (Cell v))
+  ) =>
+  Board ->
+  Coord ->
+  [Prop m (f (Cell v))] ->
+  Prop m (f Bool)
 towerConstraint board coord cells = eq .>= toNum (cells !! toIndex board coord)
   where
     as = attackers board coord
     eq = countEqual [(toIndex board c, v) | (c, v) <- as] cells
 
-latinSquare' :: Board -> forall m. MonadCell m => [Prop m (Defined Cell)] -> Prop m (Defined Bool)
+latinSquare' ::
+  (MonadCell m, EqR (f v) (f Bool), Merge (f (Cell v)), Functor f) =>
+  Board ->
+  [Prop m (f (Cell v))] ->
+  Prop m (f Bool)
 latinSquare' board = latinSquare board . map toNum
 
-latinSquare :: Board -> forall m. MonadCell m => [Prop m (Defined Int)] -> Prop m (Defined Bool)
+latinSquare ::
+  (MonadCell m, EqR x b) => Board -> [Prop m x] -> Prop m b
 latinSquare board cells =
   and'
     [ all' distinct (cols board cells),
@@ -116,7 +164,7 @@ latinSquare board cells =
   Interacting with the solver
 -}
 
-showSolution :: Board -> [Defined Cell] -> IO ()
+showSolution :: Board -> [Defined (Cell Int)] -> IO ()
 showSolution board sol = case extractSol of
   Nothing -> putStrLn "invalid solution"
   Just s -> showSol s
@@ -126,12 +174,12 @@ showSolution board sol = case extractSol of
     fromDefined (Exactly x) = Just x
     fromDefined _ = Nothing
     showSol ss = mapM_ showRow $ rows board ss
-    showRow r = putStrLn $ concat $ map (show . fst) $ r
+    showRow r = putStrLn $ concat $ map (show . value) $ r
 
 solve ::
   Board ->
-  Config Holmes (Defined Cell) ->
-  (forall m. MonadCell m => [Prop m (Defined Cell)] -> Prop m (Defined Bool)) ->
+  Config Holmes (Defined (Cell Int)) ->
+  (forall m. MonadCell m => [Prop m (Defined (Cell Int))] -> Prop m (Defined Bool)) ->
   IO ()
 solve board config constraints = do
   s <- config `satisfying` constraints
@@ -151,10 +199,21 @@ solve board config constraints = do
   ....
 -}
 
-config4 :: Config Holmes (Defined (Int, Bool))
+config4 :: Config Holmes (Defined (Cell Int))
 config4 = definedConfig (Board 4)
 
-puzzle4 :: forall m. MonadCell m => [Prop m (Defined Cell)] -> Prop m (Defined Bool)
+puzzle4 ::
+  ( OrdR (f v) (f Bool),
+    SumR (f v),
+    MonadCell m,
+    Num v,
+    Num (f v),
+    Eq v,
+    Functor f,
+    Merge (f (Cell v))
+  ) =>
+  [Prop m (f (Cell v))] ->
+  Prop m (f Bool)
 puzzle4 cells =
   and'
     [ and' (map (\i -> isTower i cells) towerIndexes),
@@ -179,10 +238,10 @@ puzzle4 cells =
     .  .  .  .  2
 -}
 
-config5 :: Config Holmes (Defined Cell)
+config5 :: Config Holmes (Defined (Cell Int))
 config5 = definedConfig (Board 5)
 
-puzzle5 :: forall m. MonadCell m => [Prop m (Defined Cell)] -> Prop m (Defined Bool)
+puzzle5 :: forall m. MonadCell m => [Prop m (Defined (Cell Int))] -> Prop m (Defined Bool)
 puzzle5 cells =
   and'
     [ and' (map (\(c, v) -> givenNum (toIndex board c) v cells) givens),
