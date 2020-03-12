@@ -1,3 +1,4 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
@@ -81,18 +82,12 @@ definedConfig :: Board -> Config Holmes (Defined (Cell Int))
 definedConfig (Board n) = (n * n) `from` [Cell v c | v <- [1 .. n], c <- [True, False]]
 
 -- | Project from Cell to the number in the cell
-toNum ::
-  (Merge (f (Cell v)), Merge (f v), Functor f) =>
-  Prop m (f (Cell v)) ->
-  Prop m (f v)
-toNum p = over (fmap value) p
+toNum :: (Mapping f c, c (Cell v), c v) => Prop m (f (Cell v)) -> Prop m (f v)
+toNum p = value .$ p
 
 -- | Project from Cell to the isTower flag
-toTower ::
-  (Merge (f (Cell v)), Merge (f Bool), Functor f) =>
-  Prop m (f (Cell v)) ->
-  Prop m (f Bool)
-toTower p = over (fmap tower) p
+toTower :: (Mapping f c, c (Cell v), c Bool) => Prop m (f (Cell v)) -> Prop m (f Bool)
+toTower p = tower .$ p
 
 {-
   Puzzle rules as constraints
@@ -100,12 +95,14 @@ toTower p = over (fmap tower) p
 
 -- | Prescribe the number value at the given index.
 givenNum ::
-  ( EqR (f v) (f Bool),
+  ( Mapping f c,
+    c (Cell v),
+    c v,
+    EqR (f v) (f Bool),
     MonadCell m,
-    Applicative f,
-    Merge (f (Cell v))
+    Applicative f
   ) =>
-  Index ->
+  Int ->
   v ->
   [Prop m (f (Cell v))] ->
   Prop m (f Bool)
@@ -113,40 +110,33 @@ givenNum i v cells = toNum (cells !! i) .== lift (pure v)
 
 -- | There is a tower at the given index.
 isTower ::
-  (Merge (f (Cell v)), Merge (f Bool), Functor f) =>
-  Index ->
+  (Mapping f c, c (Cell v), c Bool) =>
+  Int ->
   [Prop m (f (Cell v))] ->
   Prop m (f Bool)
 isTower i cells = toTower (cells !! i)
 
 -- given a list of values at indexes, count how many of these occur
 countEqual ::
-  ( SumR (f w),
-    MonadCell m,
-    Num w,
-    Num (f w),
-    Eq v,
-    Functor f,
-    Merge (f v)
-  ) =>
-  [(Index, v)] ->
-  [Prop m (f v)] ->
-  Prop m (f w)
-countEqual vals cells =
-  foldl (.+) (lift 0) (map f vals)
+  (Eq x, Mapping f c, c x, c v, Num v, Num (f v), SumR (f v), MonadCell m) =>
+  [(Int, x)] ->
+  [Prop m (f x)] ->
+  Prop m (f v)
+countEqual vals cells = foldl (.+) (lift 0) (map f vals)
   where
     isEqual v w = if w == v then 1 else 0
-    f (i, v) = fmap (isEqual v) `over` (cells !! i)
+    f (i, v) = isEqual v .$ (cells !! i)
 
 towerConstraint ::
-  ( OrdR (f v) (f Bool),
-    SumR (f v),
-    MonadCell m,
+  ( Mapping f c,
+    c (Cell v),
+    c v,
+    Eq v,
+    OrdR (f v) (f Bool),
     Num v,
     Num (f v),
-    Eq v,
-    Functor f,
-    Merge (f (Cell v))
+    SumR (f v),
+    MonadCell m
   ) =>
   Board ->
   Coord ->
@@ -158,7 +148,7 @@ towerConstraint board coord cells = eq .>= toNum (cells !! toIndex board coord)
     eq = countEqual [(toIndex board c, v) | (c, v) <- as] cells
 
 latinSquare' ::
-  (MonadCell m, EqR (f v) (f Bool), Merge (f (Cell v)), Functor f) =>
+  (Mapping f c, c (Cell v), c v, MonadCell m, EqR (f v) (f Bool)) =>
   Board ->
   [Prop m (f (Cell v))] ->
   Prop m (f Bool)
@@ -215,14 +205,17 @@ config4 :: Config Holmes (Defined (Cell Int))
 config4 = definedConfig (Board 4)
 
 puzzle4 ::
-  ( OrdR (f v) (f Bool),
-    SumR (f v),
-    MonadCell m,
+  ( Mapping f c,
+    c (Cell v),
+    c v,
+    c Bool,
+    EqR (f v) (f Bool),
+    Eq v,
+    OrdR (f v) (f Bool),
     Num v,
     Num (f v),
-    Eq v,
-    Functor f,
-    Merge (f (Cell v))
+    SumR (f v),
+    MonadCell m
   ) =>
   [Prop m (f (Cell v))] ->
   Prop m (f Bool)
