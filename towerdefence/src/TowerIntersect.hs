@@ -47,6 +47,17 @@ instance Bounded Val4 where
 
   maxBound = toEnum 4
 
+-- given a list of values at indexes, count how many of these occur
+countEqualMono ::
+  MonadCell m =>
+  [(Int, Val4)] ->
+  [Prop m (Intersect Val4)] ->
+  Prop m (Intersect Val4)
+countEqualMono vals cells = foldr (.+) (lift 0) (map f vals)
+  where
+    isEqual v w = if w == v then 1 else 0
+    f (i, v) = isEqual v .$ (cells !! i)
+
 {-
   Encoding the board for Holmes
 -}

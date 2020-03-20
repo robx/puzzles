@@ -35,3 +35,10 @@ main = hspec do
           prop cells = countEqual [(0, 3 :: Val4)] cells .>= lift (singleton (0 :: Val4))
       result <- cfg `satisfying` prop
       result `shouldBe` Just [fromList [1 :: Val4]]
+  describe "countEqualMono" do
+    it "should allow counting one candidate with Intersect" do
+      pendingWith "hangs / overflows"
+      let cfg = 1 `from` [1] :: Config Holmes (Intersect Val4)
+          prop cells = countEqualMono [(0, 3 :: Val4)] cells .>= lift (singleton (0 :: Val4))
+      result <- cfg `satisfying` prop
+      result `shouldBe` Just [fromList [1 :: Val4]]
